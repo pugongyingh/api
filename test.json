@@ -1,0 +1,24 @@
+{
+	"id": "ITRE385",
+	"owner": "NGAT",
+  "date_bought": "2014-11-03T00:00:00-05:00",
+	"warranty_date": "2017-11-03T00:00:00-05:00",
+	"maintenance_date":"2017-11-03T00:00:00-05:00",
+  "cost": "1432.67",
+  "brand": "Dell",
+  "model": "Latitude",
+  "serial": "34-E6-D7-0E-31-17",
+  "mac": "30WJN12",
+  "cams": "",
+  "os": "Windows 7",
+  "hd": "320GB",
+  "cpu": "Intel i7",
+  "ram": "8GB",
+  "graphics": "AMD Radeon HD 8790M 2GB",
+  "log": [{
+    "type": "created",
+    "date": "2017-08-09T12:59:18-05:00",
+    "staff": "Devin",
+    "note": ""
+  }]
+}
