@@ -1,7 +1,7 @@
 {
   "name": "ems",
-  "version": "0.0.1",
-  "description": "An ITRE equipment management system api",
+  "version": "0.1.0",
+  "description": "An ITRE inventory management system api",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

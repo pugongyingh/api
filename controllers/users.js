@@ -20,7 +20,7 @@ exports.list_users = function(req, res) {
 		} else if (users === null) {
 			return res.status(204).send({success: true, msg: "No users are currently registered."})
 		} else {
-			return res.status(200).send({success: true, data: users})
+			return res.status(200).send({success: true, users: users})
 		}
   })
 }
@@ -94,7 +94,18 @@ exports.login_user = function(req, res) {
         }, config.secret, {
           expiresIn: '30m'
         })
-        return res.status(200).send({success: true, message: "Successfully logged in.", token: token})
+        return res.status(200).send({
+          success: true,
+          message: "Successfully logged in.",
+          token: token,
+          user:{
+            username: req.user.username,
+            role: req.user.role,
+            first: req.user.first,
+            last: req.user.last,
+            id: req.user._id
+          }
+        })
       })
     }
   })(req, res)

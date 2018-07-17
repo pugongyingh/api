@@ -20,11 +20,11 @@ mongoose.Promise = global.Promise;
 mongoose.connect(config.database);
 
 var corsOptions = {
-  origin: ['http://ems.test', 'http://api.ems.test', 'http://localhost:3001', 'http://localhost:3002'],
+  origin: ['http://ems.test', 'http://api.ems.test', 'http://localhost:3000', 'http://localhost:3001'],
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   credentials: true,
   methods: ['GET', 'PUT', 'POST'],
-  allowedHeaders: ['Content-Type', '*']
+  allowedHeaders: ['Content-Type', 'token', '*']
 }
 
 app.use(bodyParser.urlencoded({ extended: true }));

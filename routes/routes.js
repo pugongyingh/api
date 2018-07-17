@@ -8,8 +8,8 @@ module.exports = function(app) {
   const computers = require('../controllers/computers')
 	const inventory = require('../controllers/inventory')
   const passport = require('passport')
+  const cors = require('cors')
 
-  const cookieParser = require('cookie-parser')
     //  cords = require('../controllers/cords'),
     //  misc = require('../controllers/misc'),
     //  tickets = require('../controllers/tickets'),
@@ -24,10 +24,11 @@ module.exports = function(app) {
   app.route('/inv')
     .get(inventory.list_inventory)
     .post(inventory.new_inventory)
-    .delete(inventory.delete_inventory)
 
   app.route('/inv/:id')
-    .get(inventory.list_user_inventory)
+    .get(inventory.get_inventory)
+    .put(inventory.update_inventory)
+    .delete(inventory.delete_inventory)
 
   app.route('/user')
     .get(users.list_users)
@@ -35,6 +36,9 @@ module.exports = function(app) {
 
   app.route('/user/:id')
     .get(users.list_users)
+
+  app.route('/me/inv')
+    .get(inventory.list_user_inventory)
 
   app.route('/login')
     .post(users.login_user)
@@ -50,6 +54,36 @@ module.exports = function(app) {
         return res.status(200).send({status: "All Computers Removed"})
       })
     }) */
+
+    app.use(function (err, req, res, next) {
+        let error = {}
+        if (err.name === "MongoError") {
+          switch (err.code) {
+            case 11000:
+              console.log('11000')
+              return res.status(409).send({
+                success: false,
+                error: err,
+                msg: 'This ID is already in use. Please confirm that the item you are adding does not already exist, or choose a different ID.'
+              })
+              break
+            default:
+              console.log('default')
+              return res.status(500).send({
+                success: false,
+                error: err,
+                msg: "Sorry, MongoDB encountered an error. " + err
+              })
+          }
+        } else {
+          console.log(err)
+          return res.status(500).send({
+            success: false,
+            error: err,
+            msg: "Sorry, something's gone wrong. " + err
+          })
+        }
+    })
 
 }
 /*

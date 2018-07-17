@@ -26,7 +26,10 @@ const InventorySchema = new Schema({
   updated: Date,
   project: String,
   owner: {type: Schema.Types.ObjectId, ref: 'User'},
-  available: Boolean,
+  available:  {
+    type: Boolean,
+    default: true
+  },
   borrowed: Date,
   returned: Date,
   kind: {
