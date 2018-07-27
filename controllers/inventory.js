@@ -6,7 +6,6 @@ const Accessory = mongoose.model('Accessory')
 const jwt = require('jsonwebtoken')
 const passport = require('passport')
 
-const errors = require('./errors')
 
 exports.list_inventory = function(req, res, next) {
 	Inventory.find({})
@@ -35,46 +34,33 @@ exports.list_user_inventory = function(req, res, next) {
 }
 
 exports.new_inventory = function(req, res, next) {
-	// Edit existing item
-  //if (req.headers.edit === '') {
-    let new_item
-    switch (data._doc.kind) {
-      case "Computer":
-        new_item = new Computer(req.body.item)
-        break
-      case "Cord":
-        new_item = new Cord(req.body.item)
-        break
-      case "Accessory":
-        new_item = new Accessory(req.body.item)
-        break
-      default:
-        return res.status(500).send({success: false, msg: "Kind was not a valid type", kind: data._doc.kind})
+  let new_item
+  switch (req.body.inv.kind) {
+    case "Computer":
+      new_item = new Computer(req.body.item)
+      break
+    case "Cord":
+      new_item = new Cord(req.body.item)
+      break
+    case "Accessory":
+      new_item = new Accessory(req.body.item)
+      break
+    default:
+      return res.status(500).send({success: false, msg: "Kind was not a valid type", kind: req.body.inv.kind})
+  }
+  new_item.save(function(err, doc) {
+    if (err) {
+      return res.status(500).send({success: false, msg: err});
     }
-    new_item.save(function(err, doc) {
+    req.body.inv.item = doc._id
+    let new_inv = new Inventory(req.body.inv)
+    new_inv.save(function(err, inv) {
       if (err) {
-        return res.status(500).send({success: false, msg: err});
+				return next(err)
       }
-      data._doc['item'] = doc._id
-      let new_inv = new Inventory(data._doc)
-      new_inv.save(function(err, inv) {
-        if (err) {
-					return next(err)
-        }
-        return res.status(201).send({success: true, data: [inv, doc]});
-      })
+      return res.status(201).send({success: true, data: [inv, doc]});
     })
-	// Create new item
-/*  } else {
-    let new_doc = new Inventory(req.body)
-    new_doc.save(function(err, doc) {
-      if (err) {
-			//	return next(errors.handler(err))
-			return next(err)
-      }
-      return res.status(201).send({success: true, data: doc});
-    })
-  }*/
+  })
 }
 
 exports.get_inventory = function(req, res, next) {

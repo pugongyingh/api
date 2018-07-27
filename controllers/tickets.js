@@ -1,103 +1,88 @@
-var mongoose = require('mongoose'),
-    Ticket = mongoose.model('Tickets'),
-    jwt = require('jsonwebtoken'),
-    passport = require('passport')
+const mongoose = require('mongoose')
+const Ticket = mongoose.model('Ticket')
+const Access = mongoose.model('Access')
+const Equipment = mongoose.model('Equipment')
+const Error = mongoose.model('Error')
+const Print = mongoose.model('Print')
+const NewUser = mongoose.model('NewUser')
+const Other = mongoose.model('Other')
+const jwt = require('jsonwebtoken')
+const passport = require('passport')
 
-//require('../config/passport')(passport)
 
-var getToken = function (headers) {
-  if (headers && headers.authorization) {
-    var parted = headers.authorization.split(' ');
-    if (parted.length === 2) {
-      return parted[1];
-    } else {
-      return null;
+exports.list_user_tickets = function(req, res, next) {
+	const user = jwt.decode(req.headers.token.substring(4)).id
+	Ticket.find({"user": user})
+  .populate('user')
+  .populate('info')
+  .exec(function(err, doc) {
+    if (err) {
+      return next(err)
     }
-  } else {
-    return null;
-  }
-};
+    return res.status(200).send({success: true, data: doc})
+  })
+}
 
-exports.list_all_tickets = function(req, res) {
-  var token = getToken(req.headers);
-  if (token) {
-    if (req.query.owner) {
-      Ticket.findOne({"owner": req.query.owner}, function(err, ticket) {
-        if (err)
-          res.send(err);
-        res.json(ticket);
-      });
-
-    } else {
-      Ticket.find({}, function(err, ticket) {
-        if (err)
-          res.send(err);
-        res.json(ticket);
-      });
+exports.list_tickets = function(req, res, next) {
+	let tickets, requests
+	Ticket.find({})
+  .populate('user')
+  .populate('info')
+  .exec(function(err, doc) {
+    if (err) {
+      return next(err)
     }
-  } else {
-    return res.status(403).send({success: false, msg: 'Unauthorized.'});
-  }
-};
+    return res.status(200).send({success: true, data: doc})
+  })
+}
 
-exports.create_a_ticket = function(req, res) {
-  var token = getToken(req.headers);
-  if (token) {
-    var new_ticket = new Ticket(req.body);
+exports.new_request = function(req, res, next) {
+	let sub_ticket
+  switch (req.body.ticket.kind) {
+    case "Access":
+      sub_ticket = new Access(req.body.kind)
+      break
+    case "Equipment":
+      sub_ticket = new Equipment(req.body.kind)
+      break
+    case "Error":
+      sub_ticket = new Error(req.body.kind)
+      break
+    case "Print":
+      sub_ticket = new Print(req.body.kind)
+      break
+    case "NewUser":
+      sub_ticket = new NewUser(req.body.kind)
+      break
+    case "Other":
+      sub_ticket = new Other(req.body.kind)
+      break
+    default:
+      return res.status(500).send({success: false, msg: "Kind was not a valid type", kind: req.body.ticket.kind})
+  }
+  sub_ticket.save(function(err, doc) {
+    if (err) {
+      return next(err)
+    }
+    req.body.ticket.info = doc._id
+    let new_ticket = new Ticket(req.body.ticket)
+		console.log(new_ticket)
     new_ticket.save(function(err, ticket) {
-      if (err)
-        res.send(err);
-      res.json(ticket);
-    });
-  } else {
-    return res.status(403).send({success: false, msg: 'Unauthorized.'});
-  }
-};
+      if (err) {
+				return next(err)
+      }
+      return res.status(201).send({success: true, data: [ticket, doc], req: req.body});
+    })
+  })
+}
 
-exports.view_a_ticket = function(req, res) {
-  var token = getToken(req.headers);
-  if (token) {
-    Ticket.findOne({"_id": req.params.ticketId}, function(err, ticket) {
-      if (err)
-        res.send(err);
-      res.json(ticket);
-    });
-  } else {
-    return res.status(403).send({success: false, msg: 'Unauthorized.'});
-  }
-};
 
-exports.update_a_ticket = function(req, res) {
-  var token = getToken(req.headers);
-  if (token) {
-    Ticket.findOneAndUpdate({"_id": req.params.ticketId}, {
-      $set: {owner: req.body.owner,
-      description: req.body.description,
-      kind: req.body.kind,
-      state: req.body.state,
-      level: req.body.level},
-      $push: {log: req.body.log}
-    }, {new: true}, function(err, ticket) {
-      if (err)
-        res.send(err);
-      res.json(ticket);
-    });
-  } else {
-    return res.status(403).send({success: false, msg: 'Unauthorized.'});
-  }
-};
-
-exports.delete_a_ticket = function(req, res) {
-  var token = getToken(req.headers);
-  if (token) {
-    Ticket.remove({
-      "_id": req.params.ticketId
-    }, function(err, ticket) {
-      if (err)
-        res.send(err);
-      res.json({ message: 'Ticket successfully deleted' });
-    });
-  } else {
-    return res.status(403).send({success: false, msg: 'Unauthorized.'});
-  }
-};
+exports.delete_tickets = function(req, res, next) {
+    Ticket.remove({}, function(err, ticket) {
+			if (err) {
+				next(err)
+			} else {
+	      res.json({ message: 'Tickets all successfully deleted' })
+			}
+    })
+}

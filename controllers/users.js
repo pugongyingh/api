@@ -25,16 +25,17 @@ exports.list_users = function(req, res) {
   })
 }
 
-exports.create_user = function(req, res) {
+exports.create_user = function(req, res, next) {
 	if (req.body === null || !req.body) {
 		return res.status(400).send({success: false, msg: "No user data was submitted", data: req.body})
 	} else {
     let new_doc = new User(req.body)
     new_doc.save(function(err, doc) {
       if (err) {
-        return res.status(500).send({success: false, msg: err});
+        next(err)
+      } else {
+        return res.status(201).send({success: true, data: doc})
       }
-      return res.status(201).send({success: true, data: doc});
     })
 	}
 }
