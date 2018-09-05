@@ -13,9 +13,9 @@ exports.list_inventory = function(req, res, next) {
     .populate('owner')
     .exec(function(err, doc) {
       if (err) {
-        return res.status(500).send({success: false, msg: err});
+	      return next(err)
       }
-      return res.status(201).send({success: true, data: doc})
+      return res.status(200).send({success: true, data: doc})
   })
 }
 
@@ -26,9 +26,9 @@ exports.list_user_inventory = function(req, res, next) {
 		.populate('owner')
 		.exec(function(err, doc) {
 			if (err) {
-				next(err)
+	      return next(err)
 			} else {
-				return res.status(201).send({success: true, data: doc})
+				return res.status(200).send({success: true, data: doc})
 			}
 	})
 }
@@ -46,11 +46,11 @@ exports.new_inventory = function(req, res, next) {
       new_item = new Accessory(req.body.item)
       break
     default:
-      return res.status(500).send({success: false, msg: "Kind was not a valid type", kind: req.body.inv.kind})
+      return next(err)
   }
   new_item.save(function(err, doc) {
     if (err) {
-      return res.status(500).send({success: false, msg: err});
+      return next(err)
     }
     req.body.inv.item = doc._id
     let new_inv = new Inventory(req.body.inv)
@@ -89,7 +89,7 @@ exports.delete_inventory = function(req, res, next) {
       "_id": req.params.id
     }, function(err, computer) {
 			if (err) {
-				next(err)
+	      return next(err)
 			} else {
 	      res.json({ message: 'Item successfully deleted' })
 			}
@@ -100,16 +100,18 @@ exports.delete_inventory = function(req, res, next) {
 }
 
 exports.update_inventory = function(req, res, next) {
-console.log(req.body)
-	Inventory.findOneAndUpdate({"_id": req.params.id}, { $set: req.body.inv, $push: {log: req.body.log} }, { upsert: true, new: true }, (err, inv)=>{
+	Inventory.findOneAndUpdate({"_id": req.params.id}, { $set: req.body.inv, $push: {log: req.body.log} }, { upsert: true, new: true })
+	.populate('owner')
+	.exec(function(err, inv) {
 		if (err) {
-			next(err)
-		} else {
+			//return res.status(500).send({success: false, msg: err});
+			return next(err)
+		}
 			switch (inv.kind) {
 	      case "Computer":
 	        Computer.findOneAndUpdate({"_id": inv.item._id}, { $set: req.body.item }, { upsert: true, new: true }, (err, doc)=>{
 						if (err) {
-							next(err)
+				      return next(err)
 						}
 						return res.status(201).send({success: true, msg: "Computer Successfully Updated.", data: [inv, doc]})
 					})
@@ -117,7 +119,7 @@ console.log(req.body)
 	      case "Cord":
 	        Cord.findOneAndUpdate({"_id": inv.item._id}, { $set: req.body.item }, { upsert: true, new: true }, (err, doc)=>{
 						if (err) {
-							next(err)
+				      return next(err)
 						}
 						return res.status(201).send({success: true, msg: "Cord Successfully Updated.", data: [inv, doc]})
 					})
@@ -125,14 +127,13 @@ console.log(req.body)
 	      case "Accessory":
 	        Accessory.findOneAndUpdate({"_id": inv.item._id}, { $set: req.body.item }, { upsert: true, new: true }, (err, doc)=>{
 						if (err) {
-							next(err)
+				      return next(err)
 						}
 						return res.status(201).send({success: true, msg: "Accessory Successfully Updated.", data: [inv, doc]})
 					})
 	        break
 	      default:
-	        next(err)
+		      return next(err)
 	    }
-		}
 	})
 }

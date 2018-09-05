@@ -66,7 +66,6 @@ exports.new_request = function(req, res, next) {
     }
     req.body.ticket.info = doc._id
     let new_ticket = new Ticket(req.body.ticket)
-		console.log(new_ticket)
     new_ticket.save(function(err, ticket) {
       if (err) {
 				return next(err)
@@ -78,11 +77,88 @@ exports.new_request = function(req, res, next) {
 
 
 exports.delete_tickets = function(req, res, next) {
-    Ticket.remove({}, function(err, ticket) {
-			if (err) {
-				next(err)
-			} else {
-	      res.json({ message: 'Tickets all successfully deleted' })
+  Ticket.remove({}, function(err, ticket) {
+		if (err) {
+			next(err)
+		} else {
+      res.json({ message: 'Tickets all successfully deleted' })
+		}
+  })
+}
+
+
+exports.edit_ticket = function(req, res, next) {
+	Ticket.findOneAndUpdate({"_id": req.params.id}, { $set: req.body.ticket, $push: {log: req.body.log} }, { upsert: true, new: true })
+  .populate('user')
+  .exec(function(err, ticket) {
+    if (err) {
+      return next(err)
+    }
+			switch (ticket.kind) {
+		    case "Access":
+					Access.findOneAndUpdate({"_id": ticket.info._id}, { $set: req.body.info }, { upsert: true, new: true }, (err, doc)=>{
+						if (err) {
+							next(err)
+						}
+						return res.status(201).send({success: true, msg: "Info Successfully Updated.", data: [ticket, doc]})
+					})
+		      break
+		    case "Equipment":
+					Equipment.findOneAndUpdate({"_id": ticket.info._id}, { $set: req.body.info }, { upsert: true, new: true }, (err, doc)=>{
+						if (err) {
+							next(err)
+						}
+						return res.status(201).send({success: true, msg: "Info Successfully Updated.", data: [ticket, doc]})
+					})
+		      break
+		    case "Error":
+					Error.findOneAndUpdate({"_id": ticket.info._id}, { $set: req.body.info }, { upsert: true, new: true }, (err, doc)=>{
+						if (err) {
+							next(err)
+						}
+						return res.status(201).send({success: true, msg: "Info Successfully Updated.", data: [ticket, doc]})
+					})
+		      break
+		    case "Print":
+					Print.findOneAndUpdate({"_id": ticket.info._id}, { $set: req.body.info }, { upsert: true, new: true }, (err, doc)=>{
+						if (err) {
+							next(err)
+						}
+						return res.status(201).send({success: true, msg: "Info Successfully Updated.", data: [ticket, doc]})
+					})
+		      break
+		    case "NewUser":
+					NewUser.findOneAndUpdate({"_id": ticket.info._id}, { $set: req.body.info }, { upsert: true, new: true }, (err, doc)=>{
+						if (err) {
+							next(err)
+						}
+						return res.status(201).send({success: true, msg: "Info Successfully Updated.", data: [ticket, doc]})
+					})
+		      break
+		    case "Other":
+					Other.findOneAndUpdate({"_id": ticket.info._id}, { $set: req.body.info }, { upsert: true, new: true }, (err, doc)=>{
+						if (err) {
+							next(err)
+						}
+						return res.status(201).send({success: true, msg: "Info Successfully Updated.", data: [ticket, doc]})
+					})
+		      break
+		    default:
+		      return res.status(500).send({success: false, msg: "Kind was not a valid type", kind: ticket.kind})
 			}
-    })
+	})
+}
+
+
+exports.get_ticket = function(req, res, next) {
+	let tickets, requests
+	Ticket.find({"_id": req.params.id})
+  .populate('user')
+  .populate('info')
+  .exec(function(err, doc) {
+    if (err) {
+      return next(err)
+    }
+    return res.status(200).send({success: true, data: doc})
+  })
 }

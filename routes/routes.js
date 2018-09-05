@@ -29,7 +29,9 @@ module.exports = function(app) {
     .post(users.create_user)
 
   app.route('/user/:id')
-    .get(users.list_users)
+    .get(users.view_user)
+    .put(users.update_user)
+    .delete(users.delete_user)
 
   app.route('/me/inv')
     .get(inventory.list_user_inventory)
@@ -45,44 +47,50 @@ module.exports = function(app) {
     .post(tickets.new_request)
     .delete(tickets.delete_tickets)
 
+  app.route('/tickets/:id')
+    .get(tickets.get_ticket)
+    .put(tickets.edit_ticket)
+
 /* Error Handler */
   app.use(function (err, req, res, next) {
     console.log(err)
-    if (err.name === "MongoError") {
-      switch (err.code) {
-        case 11000:
+
+    switch (err.name) {
+      case 'MongoError':
+        if (err.code === 11000) {
           return res.status(409).send({
             success: false,
             error: err,
             msg: 'This ID is already in use. Please confirm that the item you are adding does not already exist, or choose a different ID.'
           })
-          break
-        default:
+        } else {
           return res.status(500).send({
             success: false,
             error: err,
-            msg: "Sorry, MongoDB encountered an error. " + err
+            msg: "MongoDB encountered an error. " + err
           })
-      }
-    } else if (err.name === "Missing") {
-      return res.status(400).send({
-        success: false,
-        error: err,
-        msg: "This request was missing a parameter"
-      })
-    } else if (err.name === "CastError") {
-      return res.status(406).send({
-        success: false,
-        error: err,
-        msg: "This ID does not match any registered user. Please double check the Json Web Token payload."
-      })
-    } else {
-      return res.status(500).send({
-        success: false,
-        error: err,
-        msg: "Sorry, something's gone wrong. " + err
-      })
+        }
+        break;
+      case 'CastError':
+        return res.status(406).send({
+          success: false,
+          error: err,
+          msg: "This ID does not match any registered user. Please double check the Json Web Token payload."
+        })
+        break;
+      case 'Missing':
+        return res.status(400).send({
+          success: false,
+          error: err,
+          msg: "This request was missing a parameter"
+        })
+        break;
+      default:
+        return res.status(500).send({
+          success: false,
+          error: err,
+          msg: "Sorry, something's gone wrong. " + err
+        })
     }
   })
-
 }

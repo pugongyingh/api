@@ -21,7 +21,7 @@ const UserSchema = new Schema({
   first: String,
   last: String,
   program: String,
-  super: String,
+  super: {type: Schema.Types.ObjectId, ref: 'User'},
   room: String
 })
 

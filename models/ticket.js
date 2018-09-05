@@ -26,7 +26,7 @@ const TicketSchema = new Schema({
   status: {
     type: String,
     default: 'New',
-		enum: ['New', 'Seen', 'In Progress', 'On Hold', 'Awaiting Reply', 'Completed', 'Closed']
+		enum: ['New', 'Seen', 'In Progress', 'On Hold', 'Awaiting Reply', 'Completed', 'Closed', 'Reopened']
   },
   tried: [String],
   kind: {
