@@ -20,7 +20,7 @@ const UserSchema = new Schema({
   phone: String,
   first: String,
   last: String,
-  program: String,
+  program: {type: Schema.Types.ObjectId, ref: 'Program'},
   super: {type: Schema.Types.ObjectId, ref: 'User'},
   room: String
 })

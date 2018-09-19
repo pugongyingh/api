@@ -77,13 +77,22 @@ exports.new_request = function(req, res, next) {
 
 
 exports.delete_tickets = function(req, res, next) {
-  Ticket.remove({}, function(err, ticket) {
-		if (err) {
-			next(err)
-		} else {
-      res.json({ message: 'Tickets all successfully deleted' })
-		}
-  })
+	if (req.params.id === 'all') {
+    Ticket.remove({}, function(err, user) {
+      if (err) {
+  			return next(err)
+  		}
+      res.json({ message: 'All Tickets Successfully Deleted' })
+    })
+  } else {
+	  Ticket.remove({"_id": req.params.id}, function(err, ticket) {
+			if (err) {
+				next(err)
+			} else {
+	      res.json({ message: 'Ticket Successfully Deleted' })
+			}
+	  })
+	}
 }
 
 

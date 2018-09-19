@@ -9,7 +9,8 @@ const passport = require('passport')
 
 const User = require('./models/user')
 const Inventory = require('./models/inventory')
-const Ticket = require('./models/Ticket')
+const Ticket = require('./models/ticket')
+const Program = require('./models/program')
 
 const Accessory = require('./models/inv/Accessory')
 const Computer = require('./models/inv/computer')

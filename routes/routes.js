@@ -1,12 +1,14 @@
 module.exports = function(app) {
-  const users = require('../controllers/users')
   const mongoose = require('mongoose')
   const Inventory = mongoose.model('Inventory')
   const Computer = mongoose.model('Computer')
   const User = mongoose.model('User')
+  const Program = mongoose.model('Program')
   const jwt = require('jsonwebtoken')
 	const inventory = require('../controllers/inventory')
 	const tickets = require('../controllers/tickets')
+  const users = require('../controllers/users')
+	const program = require('../controllers/program')
   const passport = require('passport')
   const cors = require('cors')
 
@@ -23,6 +25,10 @@ module.exports = function(app) {
     .get(inventory.get_inventory)
     .put(inventory.update_inventory)
     .delete(inventory.delete_inventory)
+
+  app.route('/programs')
+    .get(program.list_program)
+    .post(program.new_program)
 
   app.route('/user')
     .get(users.list_users)
@@ -45,11 +51,11 @@ module.exports = function(app) {
   app.route('/tickets')
     .get(tickets.list_tickets)
     .post(tickets.new_request)
-    .delete(tickets.delete_tickets)
 
   app.route('/tickets/:id')
     .get(tickets.get_ticket)
     .put(tickets.edit_ticket)
+    .delete(tickets.delete_tickets)
 
 /* Error Handler */
   app.use(function (err, req, res, next) {

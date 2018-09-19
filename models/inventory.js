@@ -25,7 +25,8 @@ const InventorySchema = new Schema({
   },
   updated: Date,
   project: String,
-  owner: {type: Schema.Types.ObjectId, ref: 'User'},
+  program: {type: Schema.Types.ObjectId, ref: 'Program'},
+  user: {type: Schema.Types.ObjectId, ref: 'User'},
   available:  {
     type: Boolean,
     default: true

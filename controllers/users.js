@@ -14,14 +14,14 @@ function generateToken(user) {
 }
 
 exports.list_users = function(req, res, next) {
-  User.find({}, function(err, users) {
-		if (err) {
-			return next(err)
-		} else if (users === null) {
-			return res.status(204).send({success: true, msg: "No users are currently registered."})
-		} else {
-			return res.status(200).send({success: true, users: users})
-		}
+  User.find({})
+    .populate('super')
+    .populate('program')
+    .exec(function(err, doc) {
+      if (err) {
+	      return next(err)
+      }
+      return res.status(200).send({success: true, data: doc})
   })
 }
 
@@ -30,7 +30,7 @@ exports.create_user = function(req, res, next) {
 		return res.status(400).send({success: false, msg: "No user data was submitted", data: req.body})
 	} else {
     let new_doc = new User(req.body)
-    new_doc.populate('super').execPopulate()
+    new_doc.populate('super').populate('program').execPopulate()
     new_doc.save(function(err, doc) {
       if (err) {
         return next(err)
@@ -44,6 +44,7 @@ exports.create_user = function(req, res, next) {
 exports.view_user = function(req, res, next) {
   User.findOne({"username": req.params.id})
 	.populate('super')
+	.populate('program')
 	.exec(function(err, user) {
 		if (err) {
 			return next(err)
@@ -60,6 +61,7 @@ exports.update_user = function(req, res, next) {
     "username": req.params.id
   }, {$set: req.body}, {new: true})
 	.populate('super')
+	.populate('program')
 	.exec(function(err, user) {
 		if (err) {
 			return next(err)
@@ -72,14 +74,23 @@ exports.update_user = function(req, res, next) {
 }
 
 exports.delete_user = function(req, res, next) {
-  User.remove({
-    "username": req.params.id
-  }, function(err, user) {
-    if (err) {
-			return next(err)
-		}
-    res.json({ message: 'User successfully deleted' })
-  })
+  if (req.params.id === 'all') {
+    User.remove({}, function(err, user) {
+      if (err) {
+  			return next(err)
+  		}
+      res.json({ message: 'All Users Successfully Deleted' })
+    })
+  } else {
+    User.remove({
+      "username": req.params.id
+    }, function(err, user) {
+      if (err) {
+  			return next(err)
+  		}
+      res.json({ message: 'User successfully deleted' })
+    })
+  }
 }
 
 exports.login_user = function(req, res, next) {

@@ -10,7 +10,8 @@ const passport = require('passport')
 exports.list_inventory = function(req, res, next) {
 	Inventory.find({})
     .populate('item')
-    .populate('owner')
+    .populate('program')
+    .populate('user')
     .exec(function(err, doc) {
       if (err) {
 	      return next(err)
@@ -21,9 +22,10 @@ exports.list_inventory = function(req, res, next) {
 
 exports.list_user_inventory = function(req, res, next) {
 	const user = jwt.decode(req.headers.token.substring(4)).id
-	Inventory.find({"owner": user})
+	Inventory.find({"user": user})
 		.populate('item')
-		.populate('owner')
+		.populate('program')
+    .populate('user')
 		.exec(function(err, doc) {
 			if (err) {
 	      return next(err)
@@ -68,7 +70,8 @@ exports.get_inventory = function(req, res, next) {
 //  if (token) {
   Inventory.findOne({ "_id": req.params.id })
     .populate('item')
-    .populate('owner')
+    .populate('program')
+    .populate('user')
     .exec(function(err, doc) {
       if (err) {
         //return res.status(500).send({success: false, msg: err});
@@ -85,15 +88,25 @@ exports.get_inventory = function(req, res, next) {
 exports.delete_inventory = function(req, res, next) {
 //  var token = getToken(req.headers)
 //  if (token) {
-    Inventory.remove({
-      "_id": req.params.id
-    }, function(err, computer) {
+	if (req.params.id === 'all') {
+		Inventory.remove({}, function(err, user) {
+			if (err) {
+				return next(err)
+			}
+			res.json({ message: 'All Inventory Successfully Deleted' })
+		})
+	} else {
+		Inventory.remove({
+	    "_id": req.params.id
+	  }, function(err, computer) {
 			if (err) {
 	      return next(err)
 			} else {
 	      res.json({ message: 'Item successfully deleted' })
 			}
-    })
+	  })
+	}
+
 //  } else {
 //    return res.status(401).send({success: false, msg: 'You must be logged into the system to perform this action.'})
 //  }
@@ -101,7 +114,8 @@ exports.delete_inventory = function(req, res, next) {
 
 exports.update_inventory = function(req, res, next) {
 	Inventory.findOneAndUpdate({"_id": req.params.id}, { $set: req.body.inv, $push: {log: req.body.log} }, { upsert: true, new: true })
-	.populate('owner')
+	.populate('program')
+	.populate('user')
 	.exec(function(err, inv) {
 		if (err) {
 			//return res.status(500).send({success: false, msg: err});
