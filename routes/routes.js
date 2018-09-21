@@ -21,6 +21,10 @@ module.exports = function(app) {
     .get(inventory.list_inventory)
     .post(inventory.new_inventory)
 
+  app.route('/inv/batch')
+    .post(inventory.new_batch)
+    .put(inventory.edit_batch)
+
   app.route('/inv/:id')
     .get(inventory.get_inventory)
     .put(inventory.update_inventory)

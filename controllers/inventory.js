@@ -151,3 +151,80 @@ exports.update_inventory = function(req, res, next) {
 	    }
 	})
 }
+
+exports.new_batch = function(req, res, next) {
+	for (let line of req.body.batch) {
+		let new_item
+		switch (line.kind) {
+			case "Computer":
+				new_item = new Computer(line.item)
+				break
+			case "Cord":
+				new_item = new Cord(line.item)
+				break
+			case "Accessory":
+				new_item = new Accessory(line.item)
+				break
+			default:
+				return next(err)
+		}
+		new_item.save(function(err, doc) {
+			if (err) {
+				return next(err)
+			}
+			line.item = doc._id
+			line.user = req.body.user
+			line.available = false
+			let new_inv = new Inventory(line)
+			new_inv.save(function(err, inv) {
+				if (err) {
+					return next(err)
+				}
+			})
+		})
+	}
+	return res.status(201).send({success: true, msg: "Items Successfully Added."})
+}
+
+	exports.edit_batch = function(req, res, next) {
+		for (let line of req.body.batch) {
+			line.available = false
+			Inventory.findOneAndUpdate({"itreID": line.itreID}, { $set: line, $push: {log: req.body.log} }, { upsert: true, new: true })
+			.populate('program')
+			.populate('user')
+			.exec(function(err, inv) {
+				if (err) {
+					return next(err)
+				}
+				if (line.item) {
+					switch (inv.kind) {
+			      case "Computer":
+			        Computer.findOneAndUpdate({"_id": line.item._id}, { $set: line.item }, { upsert: true, new: true }, (err, doc)=>{
+								if (err) {
+						      return next(err)
+								}
+							})
+			        break
+			      case "Cord":
+			        Cord.findOneAndUpdate({"_id": line.item._id}, { $set: line.item }, { upsert: true, new: true }, (err, doc)=>{
+								if (err) {
+						      return next(err)
+								}
+							})
+			        break
+			      case "Accessory":
+			        Accessory.findOneAndUpdate({"_id": line.item._id}, { $set: line.item }, { upsert: true, new: true }, (err, doc)=>{
+								if (err) {
+						      return next(err)
+								}
+							})
+			        break
+			      default:
+				      return next(err)
+			    }
+				}
+			})
+	}
+	return res.status(201).send({success: true, msg: "Items Successfully Updated."})
+
+}
