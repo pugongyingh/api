@@ -81,6 +81,27 @@ module.exports = function(app) {
           })
         }
         break;
+      case 'UpdateError':
+        return res.status(409).send({
+          success: false,
+          error: err,
+          msg: "An error occurred while attempting to update this resource. Please check than all fields have been filled and that the ObjectID is correct."
+        })
+        break;
+      case 'FindError':
+        return res.status(404).send({
+          success: false,
+          error: err,
+          msg: "This ID does not match any registered. Please double check the Json Web Token payload."
+        })
+        break;
+      case 'NoUser':
+        return res.status(406).send({
+          success: false,
+          error: err,
+          msg: "This username does not match any registered user. Please double check your input."
+        })
+        break;
       case 'CastError':
         return res.status(406).send({
           success: false,

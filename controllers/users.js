@@ -95,14 +95,16 @@ exports.delete_user = function(req, res, next) {
 
 exports.login_user = function(req, res, next) {
   passport.authenticate('local', {session: false}, (err, user, info) => {
-    if (err || !user) {
-      return res.status(400).json({error: info.error})
+    if (err ) {
+      return next(err)
+    } else if (!user) {
+      return next({name:'NoUser'})
     } else {
       req.login(user, {session: false}, (err) => {
         if (err) {
     			return next(err)
     		}
-        const token = jwt.sign({
+        let token = jwt.sign({
           username: req.user.username,
           role: req.user.role,
           first: req.user.first,
@@ -110,7 +112,7 @@ exports.login_user = function(req, res, next) {
           room: req.user.room,
           id: req.user._id
         }, config.secret, {
-          expiresIn: '30m'
+          expiresIn: '1h'
         })
         return res.status(200).send({
           success: true,

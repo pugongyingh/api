@@ -25,6 +25,16 @@ const UserSchema = new Schema({
   room: String
 })
 
+var autoPopulateInfo = function(next) {
+  this.populate('super');
+  this.populate('program');
+  next();
+}
+
+UserSchema.
+  pre('findOne', autoPopulateInfo).
+  pre('find', autoPopulateInfo)
+
 UserSchema.pre('save', function(next)  {
   let user = this
   bcrypt.genSalt(10, function(err, salt) {

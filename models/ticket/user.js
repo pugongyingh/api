@@ -7,7 +7,7 @@ const NewUserSchema = new Schema({
   last: String,
   email: String,
   phone: String,
-  program: String,
+  program: {type: Schema.Types.ObjectId, ref: 'Program'},
   super: {type: Schema.Types.ObjectId, ref: 'User'},
   room: String,
   account: String,
@@ -20,5 +20,15 @@ const NewUserSchema = new Schema({
   hardware: [String],
   other: String
 })
+
+var autoPopulateInfo = function(next) {
+  this.populate('super');
+  this.populate('program');
+  next();
+}
+
+NewUserSchema.
+  pre('findOne', autoPopulateInfo).
+  pre('find', autoPopulateInfo)
 
 module.exports = mongoose.model('NewUser', NewUserSchema)

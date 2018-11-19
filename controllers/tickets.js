@@ -17,6 +17,7 @@ exports.list_user_tickets = function(req, res, next) {
   .populate('info')
   .exec(function(err, doc) {
     if (err) {
+			err.name = 'FindError'
       return next(err)
     }
     return res.status(200).send({success: true, data: doc})
@@ -30,6 +31,7 @@ exports.list_tickets = function(req, res, next) {
   .populate('info')
   .exec(function(err, doc) {
     if (err) {
+			err.name = 'FindError'
       return next(err)
     }
     return res.status(200).send({success: true, data: doc})
@@ -101,6 +103,7 @@ exports.edit_ticket = function(req, res, next) {
   .populate('user')
   .exec(function(err, ticket) {
     if (err) {
+			err.name = 'UpdateError'
       return next(err)
     }
 			switch (ticket.kind) {
@@ -166,6 +169,7 @@ exports.get_ticket = function(req, res, next) {
   .populate('info')
   .exec(function(err, doc) {
     if (err) {
+			err.name = 'FindError'
       return next(err)
     }
     return res.status(200).send({success: true, data: doc})
