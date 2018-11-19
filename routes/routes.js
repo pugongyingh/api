@@ -9,6 +9,7 @@ module.exports = function(app) {
 	const tickets = require('../controllers/tickets')
   const users = require('../controllers/users')
 	const program = require('../controllers/program')
+	const email = require('../config/email')
   const passport = require('passport')
   const cors = require('cors')
 
@@ -16,6 +17,9 @@ module.exports = function(app) {
 		.get(function(req, res) {
     	return res.status(200).send({status: "running"})
     })
+
+  app.route('/email/status')
+		.get(email.test_email)
 
   app.route('/inv')
     .get(inventory.list_inventory)
@@ -51,6 +55,9 @@ module.exports = function(app) {
 
   app.route('/login')
     .post(users.login_user)
+
+  app.route('/recover')
+    .post(email.send_password)
 
   app.route('/tickets')
     .get(tickets.list_tickets)
@@ -96,7 +103,7 @@ module.exports = function(app) {
         })
         break;
       case 'NoUser':
-        return res.status(406).send({
+        return res.status(404).send({
           success: false,
           error: err,
           msg: "This username does not match any registered user. Please double check your input."

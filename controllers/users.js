@@ -27,7 +27,7 @@ exports.list_users = function(req, res, next) {
 
 exports.create_user = function(req, res, next) {
 	if (req.body === null || !req.body) {
-		return res.status(400).send({success: false, msg: "No user data was submitted", data: req.body})
+    return next({name:'Missing'})
 	} else {
     let new_doc = new User(req.body)
     new_doc.populate('super').populate('program').execPopulate()
@@ -49,7 +49,7 @@ exports.view_user = function(req, res, next) {
 		if (err) {
 			return next(err)
 		} else if (user === null) {
-			return res.status(404).send({success: false, msg: "That user does not exist."})
+      return next({name:'NoUser'})
 		} else {
 			return res.status(200).send({success: true, data: user})
 		}
@@ -66,7 +66,7 @@ exports.update_user = function(req, res, next) {
 		if (err) {
 			return next(err)
 		} else if (user === null) {
-			return res.status(404).send({success: false, msg: "That user does not exist."})
+      return next({name:'NoUser'})
 		} else {
 			return res.status(200).send({success: true, data: user})
 		}
@@ -134,7 +134,7 @@ exports.roleAuthorization = function(roles) {
     let user = req.user
     User.findOne({"username": req.params.id}, function(err, foundUser) {
       if (err) {
-        res.status(422).json({error: 'No user found.'})
+        return next({name:'NoUser'})
         return next(err)
       } else {
 
