@@ -1,24 +1,37 @@
 const nodemailer = require('nodemailer')
 const mongoose = require('mongoose')
 const User = mongoose.model('User')
-const generator = require('xoauth2').createXOAuth2Generator({
-      user: 'itre-information@ncsu.edu',
-      clientId: '711238963896-i8fcn9dat5j62dbel1f4cdvul8in4fsb.apps.googleusercontent.com',
-      clientSecret: 'rEMPIH-beN3aQIO8GnRE0yOZ',
-      scope: 'https://mail.google.com/',
-      refreshToken: '1/BAAlCKXFPfDQijrNuBFUe_kIR1ry9uflkHe-mocZmaI',
-      accessToken: 'ya29.Ci9rA_rVi7kb5m1okV86reMjSaU5o-rIGYgwYim8bXNMVGxaco5jQM6EY_pdau4E1Q'
-    })
+const {google} = require('googleapis');
 
-const transport = nodemailer.createTransport({
+const generator = require('xoauth2').createXOAuth2Generator({
+  user: "itre-information@ncsu.edu",
+  clientId: "888434420125-fnavncse1apj7ovluvmfg9brh2bu8fks.apps.googleusercontent.com",
+  clientSecret: "HwwgJdpH-DbJ73KbBrh_FrTU",
+  refreshToken: "1/crhXwSm-mY0bMetECS-ty_RIEjybcuCrd8IFNO3q8hY"
+})
+
+const smtpTransport = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-      xoauth2: generator
+    xoauth2: generator
   }
 })
 
-
 exports.send_password = function(req, res, next) {
+  oauth2Client.getToken(code, (err, token) => {
+    if (err) {
+      err.note='Failed to retrieve oauth token'
+      return next(err)
+    } else {
+      oauth2Client.setCredentials(token)
+    }
+  })
+
+  const gmail = google.gmail({
+    version: 'v1',
+    auth: oauth2Client,
+  })
+
   let userInfo
   const tempPass = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
   if (req.body.username) {
@@ -30,19 +43,9 @@ exports.send_password = function(req, res, next) {
     )
     .exec(function(err, userInfo) {
       if (err) {
+        err.note='Failed to find or update user'
         return next(err)
       } else {
-        transport.sendMail({
-          from: 'ITRE Ticketing <itre-information@ncsu.edu>',
-          to: `${userInfo.email}`,
-          text: 'HI'
-        }, function(err, res) {
-          if (err) {
-            return next(err)
-          } else {
-      			return res.status(200).send({success: true})
-          }
-        })
       }
     })
   } else if (req.body.email) {
@@ -65,11 +68,19 @@ exports.send_password = function(req, res, next) {
 }
 
 exports.test_email = function(req, res, next) {
-  transport.verify(function(error, success) {
+  const mailOptions = {
+    from: "itre-information@ncsu.edu",
+    to: "drcremin@ncsu.edu",
+    subject: "Hello",
+    generateTextFromHTML: true,
+    html: "<b>Hello world</b>"
+  };
+
+  smtpTransport.sendMail(mailOptions, function(error, response) {
     if (error) {
-      res.status(500).send({success: false, error:error})
+      return next(error)
     } else {
-      return res.status(200).send({success: true})
+      return res.status(200).send({success: true, data: response})
     }
   })
 }
