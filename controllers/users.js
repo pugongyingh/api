@@ -15,10 +15,9 @@ function generateToken(user) {
 
 exports.list_users = function(req, res, next) {
   User.find({})
-    .populate('super')
-    .populate('program')
     .exec(function(err, doc) {
       if (err) {
+        err.name = 'NoUser'
 	      return next(err)
       }
       return res.status(200).send({success: true, data: doc})
@@ -43,10 +42,9 @@ exports.create_user = function(req, res, next) {
 
 exports.view_user = function(req, res, next) {
   User.findOne({"username": req.params.id})
-	.populate('super')
-	.populate('program')
 	.exec(function(err, user) {
 		if (err) {
+      err.name = 'NoUser'
 			return next(err)
 		} else if (user === null) {
       return next({name:'NoUser'})
@@ -60,10 +58,9 @@ exports.update_user = function(req, res, next) {
   User.findOneAndUpdate({
     "username": req.params.id
   }, {$set: req.body}, {new: true})
-	.populate('super')
-	.populate('program')
 	.exec(function(err, user) {
 		if (err) {
+      err.name = 'UpdateError'
 			return next(err)
 		} else if (user === null) {
       return next({name:'NoUser'})
@@ -95,13 +92,15 @@ exports.delete_user = function(req, res, next) {
 
 exports.login_user = function(req, res, next) {
   passport.authenticate('local', {session: false}, (err, user, info) => {
-    if (err ) {
+    if (err) {
+      console.log('authentication error at login')
       return next(err)
     } else if (!user) {
-      return next({name:'NoUser'})
+      return next(info)
     } else {
       req.login(user, {session: false}, (err) => {
         if (err) {
+          console.log('login error')
     			return next(err)
     		}
         let token = jwt.sign({
@@ -127,6 +126,28 @@ exports.login_user = function(req, res, next) {
       })
     }
   })(req, res, next)
+}
+
+
+exports.reset_password = function(req, res, next) {
+  User.findOneAndUpdate({
+    "resetPasswordToken": req.body.token,
+    "resetPasswordExpires": { $gt: Date.now() }  // if expires > now,  the token is still good
+  }, {$set: {
+    password: req.body.password,
+    resetPasswordToken: undefined,
+    resetPasswordExpires: undefined
+  }}, {new: false})
+	.exec(function(err, user) {
+		if (err) {
+      err.name = 'UpdateError'
+			return next(err)
+		} else if (user === null) {
+      return next({name:'ResetNotValid'})
+		} else {
+			return res.status(200).send({success: true, data: user})
+		}
+  })
 }
 
 exports.roleAuthorization = function(roles) {

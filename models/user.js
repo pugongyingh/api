@@ -12,6 +12,8 @@ const UserSchema = new Schema({
     type: String,
     Required: 'Please enter a memorable password'
   },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
   role: {
     type: String,
     default: 'Staff'
@@ -39,10 +41,12 @@ UserSchema.pre('save', function(next)  {
   let user = this
   bcrypt.genSalt(10, function(err, salt) {
     if (err) {
+      error.name = 'PassHash'
       return next(err)
     } else {
       bcrypt.hash(user.password, salt, function(error, hash) {
         if (error) {
+          error.name = 'PassHash'
           return next(error)
         } else {
           user.password = hash
@@ -53,8 +57,8 @@ UserSchema.pre('save', function(next)  {
   })
 })
 
-UserSchema.pre("update", function(next) {
-  const password = this.getUpdate().$set.password
+const hashPassword = function(next) {
+  let password = this.getUpdate().$set.password
   if (!password) {
     return next()
   }
@@ -62,11 +66,16 @@ UserSchema.pre("update", function(next) {
     const salt = bcrypt.genSaltSync()
     const hash = bcrypt.hashSync(password, salt)
     this.getUpdate().$set.password = hash
+    console.log('Password Hashed')
     next()
   } catch (error) {
+    error.name = 'PassHash'
     return next(error)
   }
-})
+}
+
+UserSchema.pre("update", hashPassword)
+UserSchema.pre("findOneAndUpdate", hashPassword)
 
 UserSchema.methods.comparePassword = function (passw, cb) {
     bcrypt.compare(passw, this.password, function (err, isMatch) {

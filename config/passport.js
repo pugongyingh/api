@@ -5,28 +5,21 @@ const passport = require('passport'),
       ExtractJwt = require('passport-jwt').ExtractJwt,
       LocalStrategy = require('passport-local');
 
-passport.use( new LocalStrategy(
-  {},
-  (username, password, done) => {
-    Users.findOne({ username: username }, (err, user) => {
-      if(err) {
-        return done({ error: 'Not Found.' })
-      } else if(!user) {
-        return done(null, false, {
-          error: 'Your login details could not be verified. Please try again.'
-        })
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+    Users.findOne({ username: username }, function (err, user) {
+      if (err) {
+        return done(err);
+      } else if (!user) {
+        return done(null, false, { name: 'NoUser' });
       } else {
-        user.comparePassword(password, (err, isMatch) => {
+        user.comparePassword(password, (err, match) => {
           if (err) {
-            return done({
-              error: 'password error.'
-            })
-          } else if (!isMatch) {
-            return done(null, false, {
-              error: "Your password is incorrect. Please check your spelling and try again."
-            })
+            return done(err)
+          } else if (!match) {
+            return done(null, false, {name: 'WrongPass'})
           } else {
-            return done(null, user);
+            return done(null, user)
           }
         })
       }
