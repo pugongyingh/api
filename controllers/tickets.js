@@ -6,6 +6,7 @@ const Error = mongoose.model('Error')
 const Print = mongoose.model('Print')
 const NewUser = mongoose.model('NewUser')
 const Other = mongoose.model('Other')
+const Borrow = mongoose.model('Borrow')
 const jwt = require('jsonwebtoken')
 const passport = require('passport')
 
@@ -59,8 +60,11 @@ exports.new_request = function(req, res, next) {
     case "Other":
       sub_ticket = new Other(req.body.kind)
       break
+    case "Borrow":
+      sub_ticket = new Borrow(req.body.kind)
+      break
     default:
-      return res.status(500).send({success: false, msg: "Kind was not a valid type", kind: req.body.ticket.kind})
+      return next({name:'Kind'})
   }
   sub_ticket.save(function(err, doc) {
     if (err) {
@@ -115,6 +119,14 @@ exports.edit_ticket = function(req, res, next) {
 						return res.status(201).send({success: true, msg: "Info Successfully Updated.", data: [ticket, doc]})
 					})
 		      break
+		    case "Borrow":
+					Borrow.findOneAndUpdate({"_id": ticket.info._id}, { $set: req.body.info }, { upsert: true, new: true }, (err, doc)=>{
+						if (err) {
+							next(err)
+						}
+						return res.status(201).send({success: true, msg: "Info Successfully Updated.", data: [ticket, doc]})
+					})
+		      break
 		    case "Equipment":
 					Equipment.findOneAndUpdate({"_id": ticket.info._id}, { $set: req.body.info }, { upsert: true, new: true }, (err, doc)=>{
 						if (err) {
@@ -156,7 +168,7 @@ exports.edit_ticket = function(req, res, next) {
 					})
 		      break
 		    default:
-		      return res.status(500).send({success: false, msg: "Kind was not a valid type", kind: ticket.kind})
+		      return next({name:'Kind'})
 			}
 	})
 }
@@ -174,4 +186,27 @@ exports.get_ticket = function(req, res, next) {
     }
     return res.status(200).send({success: true, data: doc})
   })
+}
+
+exports.batch_purchase = function(req, res, next) {
+	let ids = []
+	for (let line of req.body.batch) {
+		let sub_ticket = new Equipment(line.kind)
+		sub_ticket.save(function(err, doc) {
+			if (err) {
+				err.name='SubTicket'
+				return next(err)
+			}
+			line.ticket.info = doc._id
+			let new_ticket = new Ticket(line.ticket)
+			new_ticket.save(function(err, ticket) {
+				if (err) {
+					err.name="Ticket"
+					return next(err)
+				}
+				ids.push(ticket)
+			})
+		})
+	}
+	return res.status(201).send({success: true, msg: "Items Successfully Added.", data: ids})
 }

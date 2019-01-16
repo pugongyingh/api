@@ -66,6 +66,9 @@ module.exports = function(app) {
     .get(tickets.list_tickets)
     .post(tickets.new_request)
 
+  app.route('/tickets/purchases')
+    .post(tickets.batch_purchase)
+
   app.route('/tickets/:id')
     .get(tickets.get_ticket)
     .put(tickets.edit_ticket)
@@ -112,6 +115,20 @@ module.exports = function(app) {
           msg: "The server was unable to send an email to your address. Please consult your administrator for more information on this error."
         })
         break;
+      case 'SubTicket':
+        return res.status(500).send({
+          success: false,
+          error: err,
+          msg: "The information for this ticket could not be created."
+        })
+        break;
+      case 'Ticket':
+        return res.status(500).send({
+          success: false,
+          error: err,
+          msg: "This ticket could not be created."
+        })
+        break;
       case 'FindError':
         return res.status(404).send({
           success: false,
@@ -145,6 +162,13 @@ module.exports = function(app) {
           success: false,
           error: err,
           msg: "There was an error hashing the provided password."
+        })
+        break;
+      case 'Kind':
+        return res.status(500).send({
+          success: false,
+          error: err,
+          msg: "Kind was not a valid type"
         })
         break;
       case 'CastError':

@@ -22,6 +22,7 @@ const Error = require('./models/ticket/Error')
 const Other = require('./models/ticket/Other')
 const Print = require('./models/ticket/Print')
 const NewUser = require('./models/ticket/User')
+const Borrow = require('./models/ticket/Borrow')
 
 const routes = require('./routes/routes')
 const config = require('./config/database')

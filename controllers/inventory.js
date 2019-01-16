@@ -113,7 +113,11 @@ exports.delete_inventory = function(req, res, next) {
 }
 
 exports.update_inventory = function(req, res, next) {
-	Inventory.findOneAndUpdate({"_id": req.params.id}, { $set: req.body.inv, $push: {log: req.body.log} }, { upsert: true, new: true })
+	Inventory.findOneAndUpdate(
+		{"_id": req.params.id},
+		{ $set: req.body.inv, $push: {log: req.body.log} },
+		{ upsert: true, new: true }
+	)
 	.populate('program')
 	.populate('user')
 	.exec(function(err, inv) {
@@ -153,6 +157,7 @@ exports.update_inventory = function(req, res, next) {
 }
 
 exports.new_batch = function(req, res, next) {
+	let ids = []
 	for (let line of req.body.batch) {
 		let new_item
 		switch (line.kind) {
@@ -173,17 +178,20 @@ exports.new_batch = function(req, res, next) {
 				return next(err)
 			}
 			line.item = doc._id
-			line.user = req.body.user
+			line.user_id = req.body.user.username
+			line.program_id = req.body.user.program_id
 			line.available = false
 			let new_inv = new Inventory(line)
 			new_inv.save(function(err, inv) {
 				if (err) {
 					return next(err)
+				} else {
+					ids.push(inv)
 				}
 			})
 		})
 	}
-	return res.status(201).send({success: true, msg: "Items Successfully Added."})
+	return res.status(201).send({success: true, msg: "Items Successfully Added.", data: ids})
 }
 
 	exports.edit_batch = function(req, res, next) {

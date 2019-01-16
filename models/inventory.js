@@ -18,6 +18,7 @@ const InventorySchema = new Schema({
     Required: 'Kindly enter the ITRE ID'
   },
   serial: String,
+  cams: String,
   bought: Date,
   added: {
     type: Date,
@@ -25,8 +26,8 @@ const InventorySchema = new Schema({
   },
   updated: Date,
   project: String,
-  program: {type: Schema.Types.ObjectId, ref: 'Program'},
-  user: {type: Schema.Types.ObjectId, ref: 'User'},
+  program_id: String,
+  user_id: String,
   available:  {
     type: Boolean,
     default: true
@@ -40,7 +41,34 @@ const InventorySchema = new Schema({
   item: {type: Schema.Types.ObjectId, refPath: 'kind'},
   location: String,
   log: [LogSchema]
+},
+{ toJSON: { virtuals: true }, toObject: { virtuals: true }})
+
+InventorySchema.virtual('program', {
+ref: 'Program',
+localField: 'program_id',
+foreignField: 'code',
+justOne: true
 })
+
+InventorySchema.virtual('user', {
+  ref: 'User',
+  localField: 'user_id',
+  foreignField: 'username',
+  justOne: true
+})
+
+var autoPopulateInfo = function(next) {
+  this.populate('user');
+  this.populate('program');
+  next();
+}
+
+InventorySchema.
+  pre('findOne', autoPopulateInfo).
+  pre('find', autoPopulateInfo).
+  pre('findOneAndUpdate', autoPopulateInfo).
+  pre('update', autoPopulateInfo)
 
 InventorySchema.index({ itreID: 1 }, { unique: true })
 

@@ -12,8 +12,8 @@ const NoteSchema = new Schema({
 })
 
 const TicketSchema = new Schema({
-  user: {type: Schema.Types.ObjectId, ref: 'User'},
-  for: String,
+  user_id: String,
+  requestor_id: String,
   added: {
     type: Date,
     default: Date.now
@@ -31,10 +31,37 @@ const TicketSchema = new Schema({
   tried: [String],
   kind: {
 		type: String,
-		enum: [ 'Access', 'Equipment', 'Error', 'Print', 'NewUser', 'Other']
+		enum: [ 'Access', 'Equipment', 'Error', 'Print', 'NewUser', 'Borrow', 'Other']
 	},
   info: {type: Schema.Types.ObjectId, refPath: 'kind'},
   log: [NoteSchema]
+},
+{ toJSON: { virtuals: true }, toObject: { virtuals: true }})
+
+TicketSchema.virtual('requestor', {
+  ref: 'User',
+  localField: 'requestor_id',
+  foreignField: 'username',
+  justOne: true
 })
+
+TicketSchema.virtual('for', {
+  ref: 'User',
+  localField: 'user_id',
+  foreignField: 'username',
+  justOne: true
+})
+
+var autoPopulateInfo = function(next) {
+  this.populate('requestor');
+  this.populate('for');
+  next();
+}
+
+TicketSchema.
+  pre('findOne', autoPopulateInfo).
+  pre('find', autoPopulateInfo).
+  pre('findOneAndUpdate', autoPopulateInfo).
+  pre('update', autoPopulateInfo)
 
 module.exports = mongoose.model('Ticket', TicketSchema)

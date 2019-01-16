@@ -22,9 +22,24 @@ const UserSchema = new Schema({
   phone: String,
   first: String,
   last: String,
-  program: {type: Schema.Types.ObjectId, ref: 'Program'},
-  super: {type: Schema.Types.ObjectId, ref: 'User'},
+  program_id: String,
+  super_id: String,
   room: String
+},
+{ toJSON: { virtuals: true }, toObject: { virtuals: true }})
+
+UserSchema.virtual('program', {
+  ref: 'Program',
+  localField: 'program_id',
+  foreignField: 'code',
+  justOne: true
+})
+
+UserSchema.virtual('super', {
+  ref: 'User',
+  localField: 'super_id',
+  foreignField: 'username',
+  justOne: true
 })
 
 var autoPopulateInfo = function(next) {
@@ -35,7 +50,9 @@ var autoPopulateInfo = function(next) {
 
 UserSchema.
   pre('findOne', autoPopulateInfo).
-  pre('find', autoPopulateInfo)
+  pre('find', autoPopulateInfo).
+  pre('findOneAndUpdate', autoPopulateInfo).
+  pre('update', autoPopulateInfo)
 
 UserSchema.pre('save', function(next)  {
   let user = this

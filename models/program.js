@@ -10,4 +10,5 @@ const ProgramSchema = new Schema({
   director: String
 })
 
+ProgramSchema.index({ code: 1 }, { unique: true })
 module.exports = mongoose.model('Program', ProgramSchema)

@@ -13,6 +13,7 @@ const EquipmentSchema = new Schema({
   },
   type: String,
   desc: String,
+  tempItem: {type: Schema.Types.ObjectId, ref: 'Inventory'}
 })
 
 module.exports = mongoose.model('Equipment', EquipmentSchema)

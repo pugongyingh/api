@@ -7,8 +7,8 @@ const NewUserSchema = new Schema({
   last: String,
   email: String,
   phone: String,
-  program: {type: Schema.Types.ObjectId, ref: 'Program'},
-  super: {type: Schema.Types.ObjectId, ref: 'User'},
+  program_id: String,
+  super_id: String,
   room: String,
   account: String,
   start: {
@@ -19,6 +19,21 @@ const NewUserSchema = new Schema({
   software: [String],
   hardware: [String],
   other: String
+},
+{ toJSON: { virtuals: true }, toObject: { virtuals: true }})
+
+NewUserSchema.virtual('program', {
+  ref: 'Program',
+  localField: 'program_id',
+  foreignField: 'code',
+  justOne: true
+})
+
+NewUserSchema.virtual('super', {
+  ref: 'User',
+  localField: 'super_id',
+  foreignField: 'username',
+  justOne: true
 })
 
 var autoPopulateInfo = function(next) {
@@ -29,6 +44,8 @@ var autoPopulateInfo = function(next) {
 
 NewUserSchema.
   pre('findOne', autoPopulateInfo).
-  pre('find', autoPopulateInfo)
+  pre('find', autoPopulateInfo).
+  pre('findOneAndUpdate', autoPopulateInfo).
+  pre('update', autoPopulateInfo)
 
 module.exports = mongoose.model('NewUser', NewUserSchema)
