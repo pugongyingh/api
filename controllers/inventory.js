@@ -5,6 +5,7 @@ const Cord = mongoose.model('Cord')
 const Accessory = mongoose.model('Accessory')
 const jwt = require('jsonwebtoken')
 const passport = require('passport')
+const async = require("async")
 
 
 exports.list_inventory = function(req, res, next) {
@@ -89,14 +90,14 @@ exports.delete_inventory = function(req, res, next) {
 //  var token = getToken(req.headers)
 //  if (token) {
 	if (req.params.id === 'all') {
-		Inventory.remove({}, function(err, user) {
+		Inventory.deleteMany({}, function(err, user) {
 			if (err) {
 				return next(err)
 			}
 			res.json({ message: 'All Inventory Successfully Deleted' })
 		})
 	} else {
-		Inventory.remove({
+		Inventory.deleteOne({
 	    "_id": req.params.id
 	  }, function(err, computer) {
 			if (err) {
@@ -157,8 +158,8 @@ exports.update_inventory = function(req, res, next) {
 }
 
 exports.new_batch = function(req, res, next) {
-	let ids = []
-	for (let line of req.body.batch) {
+	let list = []
+	async.map(req.body.batch, (line, callback) => {
 		let new_item
 		switch (line.kind) {
 			case "Computer":
@@ -171,12 +172,11 @@ exports.new_batch = function(req, res, next) {
 				new_item = new Accessory(line.item)
 				break
 			default:
-				return next(err)
+				console.log('Wrong Kind')
+				callback()
 		}
+
 		new_item.save(function(err, doc) {
-			if (err) {
-				return next(err)
-			}
 			line.item = doc._id
 			line.user_id = req.body.user.username
 			line.program_id = req.body.user.program_id
@@ -184,14 +184,23 @@ exports.new_batch = function(req, res, next) {
 			let new_inv = new Inventory(line)
 			new_inv.save(function(err, inv) {
 				if (err) {
-					return next(err)
+					console.log(err)
 				} else {
-					ids.push(inv)
+					new_inv._id = inv._id
+					new_inv.item = doc
+					list.push(new_inv)
+					callback()
 				}
 			})
 		})
-	}
-	return res.status(201).send({success: true, msg: "Items Successfully Added.", data: ids})
+	}, (err, results) => {
+		if (err) {
+			console.log(err)
+			return next(err)
+		}
+		return res.status(201).send({success: true, msg: "Items Successfully Added.", data: list})
+	})
+
 }
 
 	exports.edit_batch = function(req, res, next) {

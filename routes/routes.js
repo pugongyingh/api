@@ -115,18 +115,18 @@ module.exports = function(app) {
           msg: "The server was unable to send an email to your address. Please consult your administrator for more information on this error."
         })
         break;
-      case 'SubTicket':
+      case 'SubNew':
         return res.status(500).send({
           success: false,
           error: err,
-          msg: "The information for this ticket could not be created."
+          msg: "The nested information for this item could not be created."
         })
         break;
-      case 'Ticket':
+      case 'New':
         return res.status(500).send({
           success: false,
           error: err,
-          msg: "This ticket could not be created."
+          msg: "This item could not be created."
         })
         break;
       case 'FindError':

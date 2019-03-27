@@ -12,8 +12,14 @@ const NoteSchema = new Schema({
 })
 
 const TicketSchema = new Schema({
-  user_id: String,
-  requestor_id: String,
+  user_id: {
+    type: String,
+    Required: 'Please enter the ID of the user or department who needs this issue resolved'
+  },
+  requestor_id: {
+    type: String,
+    Required: 'Please enter the ID of the user who requested this issue ticket'
+  },
   added: {
     type: Date,
     default: Date.now

@@ -103,6 +103,12 @@ exports.delete_tickets = function(req, res, next) {
 
 
 exports.edit_ticket = function(req, res, next) {
+	if (!req.body.log) {
+		req.body.log = {
+			type: 'Update',
+		  note: 'Log not included in update'
+		}
+	}
 	Ticket.findOneAndUpdate({"_id": req.params.id}, { $set: req.body.ticket, $push: {log: req.body.log} }, { upsert: true, new: true })
   .populate('user')
   .exec(function(err, ticket) {
@@ -194,19 +200,19 @@ exports.batch_purchase = function(req, res, next) {
 		let sub_ticket = new Equipment(line.kind)
 		sub_ticket.save(function(err, doc) {
 			if (err) {
-				err.name='SubTicket'
+				err.name='SubNew'
 				return next(err)
 			}
 			line.ticket.info = doc._id
 			let new_ticket = new Ticket(line.ticket)
 			new_ticket.save(function(err, ticket) {
 				if (err) {
-					err.name="Ticket"
+					err.name="New"
 					return next(err)
 				}
 				ids.push(ticket)
 			})
 		})
 	}
-	return res.status(201).send({success: true, msg: "Items Successfully Added.", data: ids})
+	return res.status(201).send({success: true, msg: "Tickets Successfully Added.", data: ids})
 }

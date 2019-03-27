@@ -39,6 +39,7 @@ exports.create_user = function(req, res, next) {
     })
 	}
 }
+}
 
 exports.view_user = function(req, res, next) {
   User.findOne({"username": req.params.id})
@@ -88,45 +89,6 @@ exports.delete_user = function(req, res, next) {
       res.json({ message: 'User successfully deleted' })
     })
   }
-}
-
-exports.login_user = function(req, res, next) {
-  passport.authenticate('local', {session: false}, (err, user, info) => {
-    if (err) {
-      console.log('authentication error at login')
-      return next(err)
-    } else if (!user) {
-      return next(info)
-    } else {
-      req.login(user, {session: false}, (err) => {
-        if (err) {
-          console.log('login error')
-    			return next(err)
-    		}
-        let token = jwt.sign({
-          username: req.user.username,
-          role: req.user.role,
-          first: req.user.first,
-          last: req.user.last,
-          room: req.user.room,
-          id: req.user._id
-        }, config.secret, {
-          expiresIn: '1h'
-        })
-        return res.status(200).send({
-          success: true,
-          message: "Successfully logged in.",
-          token: token,
-          user:{
-            role: req.user.role,
-            first: req.user.first,
-            last: req.user.last
-          }
-        })
-      })
-    }
-  })(req, res, next)
-}
 
 
 exports.reset_password = function(req, res, next) {
