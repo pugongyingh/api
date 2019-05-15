@@ -2,11 +2,11 @@
   "name": "ems",
   "version": "0.1.0",
   "description": "An ITRE inventory management system api",
-  "main": "index.js",
+  "main": "functions/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "netlify-lambda build .",
-    "serve": "netlify-lambda serve ."
+    "build": "netlify-lambda build server",
+    "serve": "netlify-lambda serve server"
   },
   "author": "Devin Cremins",
   "license": "ISC",

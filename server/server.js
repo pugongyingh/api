@@ -49,7 +49,8 @@ app.use(morgan('dev'))
 
 routes(app);
 
-app.use('/.netlify/functions/server', router);
+app.use('/.netlify/functions/server', router);  // path must route to lambda
 
 //app.listen(config.port);
+module.exports = app;
 module.exports.handler = serverless(app)
