@@ -14,23 +14,22 @@ const Inventory = require('./models/inventory')
 const Ticket = require('./models/ticket')
 const Program = require('./models/program')
 
-const Accessory = require('./models/inv/Accessory')
+const Accessory = require('./models/inv/accessory')
 const Computer = require('./models/inv/computer')
 const Cord = require('./models/inv/Cord')
 
-const Access = require('./models/ticket/Access')
-const Equipment = require('./models/ticket/Equipment')
-const Error = require('./models/ticket/Error')
-const Other = require('./models/ticket/Other')
-const Print = require('./models/ticket/Print')
-const NewUser = require('./models/ticket/User')
-const Borrow = require('./models/ticket/Borrow')
+const Access = require('./models/ticket/access')
+const Equipment = require('./models/ticket/equipment')
+const Error = require('./models/ticket/error')
+const Other = require('./models/ticket/other')
+const Print = require('./models/ticket/print')
+const NewUser = require('./models/ticket/user')
+const Borrow = require('./models/ticket/borrow')
 
 const routes = require('./routes/routes')
 const config = require('./config/database')
 const cookieParser = require('cookie-parser')
 
-export default function expressApp() {
   mongoose.Promise = global.Promise;
   mongoose.connect(config.database);
 
@@ -51,8 +50,7 @@ export default function expressApp() {
 
   routes(app);
 
-  app.use('/.netlify/functions/server', router);  // path must route to lambda
-
   //app.listen(config.port);
-  return app;
-}
+  app.use('/.netlify/functions/server', router);
+  module.exports = app;
+  module.exports.handler = serverless(app);
