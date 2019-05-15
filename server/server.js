@@ -7,6 +7,7 @@ const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const cors = require('cors')
 const passport = require('passport')
+const router = express.Router()
 
 const User = require('./models/user')
 const Inventory = require('./models/inventory')
@@ -52,5 +53,4 @@ routes(app);
 app.use('/.netlify/functions/server', router);  // path must route to lambda
 
 //app.listen(config.port);
-module.exports = app;
-module.exports.handler = serverless(app)
+return app;
