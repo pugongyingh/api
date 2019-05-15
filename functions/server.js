@@ -1,11 +1,8 @@
 import serverless from 'serverless-http'
-import server from './server/server.js'
-
-// We need to define our function name for express routes to set the correct base path
-const functionName = 'server'
+import expressApp from './server/server.js'
 
 // Initialize express app
-const app = server()
+const app = expressApp()
 
 // Export lambda handler
 exports.handler = serverless(app)

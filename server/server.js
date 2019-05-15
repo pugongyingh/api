@@ -30,27 +30,29 @@ const routes = require('./routes/routes')
 const config = require('./config/database')
 const cookieParser = require('cookie-parser')
 
-mongoose.Promise = global.Promise;
-mongoose.connect(config.database);
+export default function expressApp() {
+  mongoose.Promise = global.Promise;
+  mongoose.connect(config.database);
 
-var corsOptions = {
-  origin: ['https://nostalgic-colden-ef19c7.netlify.com'],
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-  credentials: true,
-  methods: ['GET', 'PUT', 'POST'],
-  allowedHeaders: ['Content-Type', 'token', 'admin', '*']
+  var corsOptions = {
+    origin: ['https://nostalgic-colden-ef19c7.netlify.com'],
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    credentials: true,
+    methods: ['GET', 'PUT', 'POST'],
+    allowedHeaders: ['Content-Type', 'token', 'admin', '*']
+  }
+
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json());
+  app.use(cookieParser())
+  app.use(cors(corsOptions));
+  app.use(passport.initialize());
+  app.use(morgan('dev'))
+
+  routes(app);
+
+  app.use('/.netlify/functions/server', router);  // path must route to lambda
+
+  //app.listen(config.port);
+  return app;
 }
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(cookieParser())
-app.use(cors(corsOptions));
-app.use(passport.initialize());
-app.use(morgan('dev'))
-
-routes(app);
-
-app.use('/.netlify/functions/server', router);  // path must route to lambda
-
-//app.listen(config.port);
-return app;
