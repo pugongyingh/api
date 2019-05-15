@@ -49,5 +49,7 @@ app.use(morgan('dev'))
 
 routes(app);
 
+app.use('/.netlify/functions/server', router);
+
 //app.listen(config.port);
 module.exports.handler = serverless(app)
