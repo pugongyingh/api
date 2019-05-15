@@ -16,7 +16,7 @@ const Program = require('./models/program')
 
 const Accessory = require('./models/inv/accessory')
 const Computer = require('./models/inv/computer')
-const Cord = require('./models/inv/Cord')
+const Cord = require('./models/inv/cord')
 
 const Access = require('./models/ticket/access')
 const Equipment = require('./models/ticket/equipment')
