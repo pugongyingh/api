@@ -1,4 +1,5 @@
 const express = require('express')
+const serverless = require('serverless-http')
 const app = express()
 const port = process.env.PORT || 8080
 const mongoose = require('mongoose')
@@ -32,7 +33,7 @@ mongoose.Promise = global.Promise;
 mongoose.connect(config.database);
 
 var corsOptions = {
-  origin: ['http://ems.test', 'http://api.ems.test', 'http://localhost:3000', 'http://localhost:3001'],
+  origin: ['https://nostalgic-colden-ef19c7.netlify.com'],
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   credentials: true,
   methods: ['GET', 'PUT', 'POST'],
@@ -48,4 +49,5 @@ app.use(morgan('dev'))
 
 routes(app);
 
-app.listen(config.port);
+//app.listen(config.port);
+module.exports.handler = serverless(app)
