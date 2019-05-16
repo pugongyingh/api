@@ -86,6 +86,7 @@ const hashPassword = function(next) {
     console.log('Password Hashed')
     next()
   } catch (error) {
+    console.log(error)
     error.name = 'PassHash'
     return next(error)
   }

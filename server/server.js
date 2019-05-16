@@ -30,11 +30,20 @@ const routes = require('./routes/routes')
 const config = require('./config/database')
 const cookieParser = require('cookie-parser')
 
-  mongoose.Promise = global.Promise;
-  mongoose.connect(config.database);
+mongoose.connect(
+  process.env.ATLAS,
+  {
+    useNewUrlParser: true,
+    dbName: process.env.DB,
+    reconnectTries: 3,
+    reconnectInterval: 5000
+  }, function(error) {
+  // Check error in initial connection. There is no 2nd param to the callback.
+  console.log(error)
+});
 
   var corsOptions = {
-    origin: ['https://nostalgic-colden-ef19c7.netlify.com'],
+    origin: ['https://nostalgic-colden-ef19c7.netlify.com', ],
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     credentials: true,
     methods: ['GET', 'PUT', 'POST'],
@@ -49,8 +58,7 @@ const cookieParser = require('cookie-parser')
   app.use(morgan('dev'))
 
   routes(app);
-
   //app.listen(config.port);
-  app.use('/.netlify/functions/server', router);
+  //app.use('/.netlify/functions/server', router);
   module.exports = app;
   module.exports.handler = serverless(app);
