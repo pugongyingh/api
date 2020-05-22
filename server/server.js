@@ -31,7 +31,7 @@ const config = require('./config/database')
 const cookieParser = require('cookie-parser')
 
 mongoose.connect(
-  process.env.ATLAS,
+  'mongodb+srv://pgyh:mmmmmm88@cluster0-ddyp4.mongodb.net/test?retryWrites=true&w=majority',
   {
     useNewUrlParser: true,
     dbName: 'pgyh',
@@ -41,6 +41,13 @@ mongoose.connect(
   // Check error in initial connection. There is no 2nd param to the callback.
   console.log(error)
 });
+
+ // mongoose.connect('mongodb+srv://pgyh:mmmmmm88@cluster0-ddyp4.mongodb.net/test?retryWrites=true&w=majority',{
+ //   useNewUrlParser: true,
+ //   useFindAndModify: false,
+ //   useUnifiedTopology: true
+ //   }
+//  ).then(db => console.log('DB is connected')).catch(err => console.error(err))
 
   var corsOptions = {
     origin: ['https://amazing-kalam-431070.netlify.app', ],
