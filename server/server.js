@@ -1,7 +1,7 @@
 const express = require('express')
 const serverless = require('serverless-http')
 const app = express()
-const port = process.env.PORT || 8080
+const port = process.env.PORT || 80
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
@@ -34,7 +34,7 @@ mongoose.connect(
   process.env.ATLAS,
   {
     useNewUrlParser: true,
-    dbName: process.env.DB,
+    dbName: 'pgyh',
     reconnectTries: 3,
     reconnectInterval: 5000
   }, function(error) {
@@ -43,7 +43,7 @@ mongoose.connect(
 });
 
   var corsOptions = {
-    origin: ['https://nostalgic-colden-ef19c7.netlify.com', ],
+    origin: ['https://amazing-kalam-431070.netlify.app', ],
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     credentials: true,
     methods: ['GET', 'PUT', 'POST'],
