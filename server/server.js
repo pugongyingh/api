@@ -29,43 +29,10 @@ const Borrow = require('./models/ticket/borrow')
 const routes = require('./routes/routes')
 const config = require('./config/database')
 const cookieParser = require('cookie-parser')
-
-mongoose.connect(
-  'mongodb+srv://pgyh:mmmmmm88@cluster0-ddyp4.mongodb.net/test?retryWrites=true&w=majority',
-  {
-    useNewUrlParser: true,
-    dbName: 'pgyh',
-    reconnectTries: 3,
-    reconnectInterval: 5000
-  }, function(error) {
-  // Check error in initial connection. There is no 2nd param to the callback.
-  console.log(error)
+app.get('/', function (req, res) {
+  res.send('Hello World');
 });
 
- // mongoose.connect('mongodb+srv://pgyh:mmmmmm88@cluster0-ddyp4.mongodb.net/test?retryWrites=true&w=majority',{
- //   useNewUrlParser: true,
- //   useFindAndModify: false,
- //   useUnifiedTopology: true
- //   }
-//  ).then(db => console.log('DB is connected')).catch(err => console.error(err))
-
-  var corsOptions = {
-    origin: ['https://amazing-kalam-431070.netlify.app', ],
-    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-    credentials: true,
-    methods: ['GET', 'PUT', 'POST'],
-    allowedHeaders: ['Content-Type', 'token', 'admin', '*']
-  }
-
-  app.use(bodyParser.urlencoded({ extended: true }));
-  app.use(bodyParser.json());
-  app.use(cookieParser())
-  app.use(cors(corsOptions));
-  app.use(passport.initialize());
-  app.use(morgan('dev'))
-
-  routes(app);
-  //app.listen(config.port);
-  //app.use('/.netlify/functions/server', router);
-  module.exports = app;
-  module.exports.handler = serverless(app);
+app.listen(80, function () {
+  console.log('app is listening at port 80');
+});
